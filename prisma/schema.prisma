@@ -1,0 +1,77 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+enum BookingStatus {
+  CONFIRMED
+  CANCELLED
+}
+
+model User {
+  id           String          @id @default(cuid())
+  email        String          @unique
+  name         String
+  passwordHash String
+  role         Role            @default(USER)
+  active       Boolean         @default(true)
+  createdAt    DateTime        @default(now())
+  bookings     Booking[]
+  resets       PasswordReset[]
+}
+
+model PasswordReset {
+  id        String    @id @default(cuid())
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tokenHash String    @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+}
+
+model Service {
+  id          String   @id @default(cuid())
+  name        String
+  description String
+  durationMin Int
+  priceCents  Int
+  imageUrl    String?
+  active      Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  slots       Slot[]
+}
+
+model Slot {
+  id        String    @id @default(cuid())
+  serviceId String
+  service   Service   @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+  startsAt  DateTime
+  endsAt    DateTime
+  capacity  Int       @default(1)
+  bookings  Booking[]
+
+  @@unique([serviceId, startsAt])
+  @@index([startsAt])
+}
+
+model Booking {
+  id        String        @id @default(cuid())
+  userId    String
+  user      User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  slotId    String
+  slot      Slot          @relation(fields: [slotId], references: [id])
+  status    BookingStatus @default(CONFIRMED)
+  createdAt DateTime      @default(now())
+
+  @@unique([userId, slotId])
+  @@index([slotId])
+}
