@@ -52,6 +52,6 @@ export const GET = handler(async (req) => {
   line(row(header), bold);
   data.forEach((r) => line(row(r)));
   if (!data.length) line("No confirmed bookings in this period.");
-  const bytes = await doc.save();
+  const bytes = new Uint8Array(await doc.save()); // copy into a plain ArrayBuffer-backed array (satisfies BodyInit typing)
   return new Response(bytes, { headers: { "Content-Type": "application/pdf", "Content-Disposition": `attachment; filename="${name}.pdf"` } });
 });

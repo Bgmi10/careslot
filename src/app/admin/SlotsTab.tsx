@@ -15,7 +15,7 @@ export default function SlotsTab() {
   const [error, setError] = useState("");
 
   useEffect(() => { api<Svc[]>("/api/admin/services").then((s) => { setServices(s); if (s[0]) setServiceId(s[0].id); }); }, []);
-  const load = () => serviceId && api<Slot[]>(`/api/admin/slots?serviceId=${serviceId}`).then(setSlots).catch((e) => setError(e.message));
+  const load: any = () => serviceId && api<Slot[]>(`/api/admin/slots?serviceId=${serviceId}`).then(setSlots).catch((e) => setError(e.message));
   useEffect(() => { load(); /* eslint-disable-next-line */ }, [serviceId]);
 
   async function generate(e: React.FormEvent) {
